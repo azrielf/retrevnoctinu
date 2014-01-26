@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/UnitConverter/UnitConverter.iml" filepath="$PROJECT_DIR$/UnitConverter/UnitConverter.iml" />
+      <module fileurl="file://$PROJECT_DIR$/UnitConverterProject.iml" filepath="$PROJECT_DIR$/UnitConverterProject.iml" />
+    </modules>
+  </component>
+</project>
+
