@@ -50,6 +50,11 @@ public class MainActivity extends ActionBarActivity implements android.app.Actio
 
         mConverters = new ConvertersManager();
 
+        // initialize the state of the converters manager
+        int selectedConverterType = getPreferences(Activity.MODE_PRIVATE).getInt(PREF_SELECTED_UNIT_TYPE, 0);
+        mConverters.setCurrConverter(selectedConverterType);
+        mConverters.updateUnits(selectedConverterType);
+
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.container, new PlaceholderFragment(mConverters))
@@ -94,25 +99,25 @@ public class MainActivity extends ActionBarActivity implements android.app.Actio
         return false;
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//
+//        // Inflate the menu; this adds items to the action bar if it is present.
+//        getMenuInflater().inflate(R.menu.main, menu);
+//        return true;
+//    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {Toast.makeText(this, "onOptionsItemSelected", Toast.LENGTH_SHORT).show();
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        switch (item.getItemId()) {
-            case R.id.action_settings:
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) {Toast.makeText(this, "onOptionsItemSelected", Toast.LENGTH_SHORT).show();
+//        // Handle action bar item clicks here. The action bar will
+//        // automatically handle clicks on the Home/Up button, so long
+//        // as you specify a parent activity in AndroidManifest.xml.
+//        switch (item.getItemId()) {
+//            case R.id.action_settings:
+//                return true;
+//        }
+//        return super.onOptionsItemSelected(item);
+//    }
 
 
     /**
@@ -124,8 +129,8 @@ public class MainActivity extends ActionBarActivity implements android.app.Actio
                        AdapterView.OnItemSelectedListener,
                        TextWatcher {
 
-        static private final String PREF_SELECTED_UNIT_1 = "SelectedUnit1";
-        static private final String PREF_SELECTED_UNIT_2 = "SelectedUnit2";
+        static private final String PREF_SELECTED_UNIT_1_TYPE_X = "SelectedUnit1_Type%d";
+        static private final String PREF_SELECTED_UNIT_2_TYPE_X = "SelectedUnit2_Type%d";
         static private final String PREF_VALUE_UNIT_1 = "ValueUnit1";
 
         static private final String NUMBER_EDIT_FORMAT = "0.####"; //"%.3f";
@@ -139,7 +144,6 @@ public class MainActivity extends ActionBarActivity implements android.app.Actio
         ConvertersManager mConverters;
         UnitsSpinnerAdapter mAdapterUnits;
         boolean mWatchTextUnit = true;
-        boolean mInitialUnitTypeSelection = true;
         int mLastSelectedUnit1;
         int mLastSelectedUnit2;
 
@@ -176,14 +180,22 @@ public class MainActivity extends ActionBarActivity implements android.app.Actio
 
             mImageSymbol = (ImageView)rootView.findViewById(R.id.imageUnitSymbol);
 
+            // set the initially selected units by the selection in the last session
+            int selectedUnitsType = getActivity().getActionBar().getSelectedNavigationIndex();
+            SharedPreferences pref = getActivity().getPreferences(Activity.MODE_PRIVATE);
+            mSpinnerUnits1.setSelection(pref.getInt(String.format(PREF_SELECTED_UNIT_1_TYPE_X, selectedUnitsType), 0));
+            mSpinnerUnits2.setSelection(pref.getInt(String.format(PREF_SELECTED_UNIT_2_TYPE_X, selectedUnitsType), 1));
+
+            // restore the last values the user used (the second value is calculated by the first one)
+            mTextUnit1.setText(pref.getString(PREF_VALUE_UNIT_1, "0"));
+            mTextUnit1.setSelection(mTextUnit1.getText().length());
+
             return rootView;
         }
 
         @Override
         public void onDestroyView() {
             SharedPreferences.Editor editor = getActivity().getPreferences(Activity.MODE_PRIVATE).edit();
-            editor.putInt(PREF_SELECTED_UNIT_1, mSpinnerUnits1.getSelectedItemPosition());
-            editor.putInt(PREF_SELECTED_UNIT_2, mSpinnerUnits2.getSelectedItemPosition());
             editor.putString(PREF_VALUE_UNIT_1, mTextUnit1.getText().toString());
             editor.commit();
 
@@ -194,21 +206,12 @@ public class MainActivity extends ActionBarActivity implements android.app.Actio
         public void onCurrentUnitsUpdated() {
             mImageSymbol.setImageResource(mConverters.getCurrConverterSymbolResId());
 
-            // The first time the unit type is set, set the selection according to the ones saved in the preferences
-            if (mInitialUnitTypeSelection) {
-                mInitialUnitTypeSelection = false;
+            // restore the last units selections the user used for this type of unit
+            int selectedUnitsType = getActivity().getActionBar().getSelectedNavigationIndex();
+            SharedPreferences pref = getActivity().getPreferences(Activity.MODE_PRIVATE);
+            mSpinnerUnits1.setSelection(pref.getInt(String.format(PREF_SELECTED_UNIT_1_TYPE_X, selectedUnitsType), 0));
+            mSpinnerUnits2.setSelection(pref.getInt(String.format(PREF_SELECTED_UNIT_2_TYPE_X, selectedUnitsType), 1));
 
-                SharedPreferences pref = getActivity().getPreferences(Activity.MODE_PRIVATE);
-                mSpinnerUnits1.setSelection(pref.getInt(PREF_SELECTED_UNIT_1, 0));
-                mSpinnerUnits2.setSelection(pref.getInt(PREF_SELECTED_UNIT_2, 1));
-
-                // restore the last values the user used (the second value is calculated by the first one)
-                mTextUnit1.setText(pref.getString(PREF_VALUE_UNIT_1, "0"));
-                mTextUnit1.setSelection(mTextUnit1.getText().length());
-            } else {
-                mSpinnerUnits1.setSelection(0);
-                mSpinnerUnits2.setSelection(1);
-            }
 
             mAdapterUnits.notifyDataSetChanged();
             convert(true);
@@ -237,6 +240,13 @@ public class MainActivity extends ActionBarActivity implements android.app.Actio
                     convert(true);
                     break;
             }
+
+            // save selected units for each unit type
+            int selectedUnitsType = getActivity().getActionBar().getSelectedNavigationIndex();
+            SharedPreferences.Editor editor = getActivity().getPreferences(Activity.MODE_PRIVATE).edit();
+            editor.putInt(String.format(PREF_SELECTED_UNIT_1_TYPE_X, selectedUnitsType), mSpinnerUnits1.getSelectedItemPosition());
+            editor.putInt(String.format(PREF_SELECTED_UNIT_2_TYPE_X, selectedUnitsType), mSpinnerUnits2.getSelectedItemPosition());
+            editor.commit();
         }
 
         // TextWatcher
@@ -247,7 +257,7 @@ public class MainActivity extends ActionBarActivity implements android.app.Actio
         // TextWatcher
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
-            if (mWatchTextUnit) {
+            if (mWatchTextUnit && getActivity().getCurrentFocus() != null) {
                 convert(getActivity().getCurrentFocus().getId() == R.id.textUnit1);
             }
         }
@@ -326,7 +336,6 @@ public class MainActivity extends ActionBarActivity implements android.app.Actio
 //            double input = Double.parseDouble(strFrom);
             double input = getDoubleValue(strFrom);
 
-//            msg("input = " + String.valueOf(input));
             ConverterBase.eUnits unitFrom = ((Pair <ConverterBase.eUnits, String>)spinnerFrom.getSelectedItem()).first;
             ConverterBase.eUnits unitTo = ((Pair <ConverterBase.eUnits, String>)spinnerTo.getSelectedItem()).first;
 
