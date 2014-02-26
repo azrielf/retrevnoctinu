@@ -44,7 +44,12 @@ public class LengthConverter extends ConverterBase {
 
     @Override
     protected int getBackground() {
-        return R.drawable.bg_length;
+        return R.color.bg_length;
+    }
+
+    @Override
+    protected int getSymbolResId() {
+        return R.drawable.symbol_length;
     }
 
     @Override

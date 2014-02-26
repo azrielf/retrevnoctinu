@@ -48,7 +48,12 @@ public class MassConverter extends ConverterBase {
 
     @Override
     protected int getBackground() {
-        return R.drawable.bg_mass;
+        return R.color.bg_mass;
+    }
+
+    @Override
+    protected int getSymbolResId() {
+        return R.drawable.symbol_mass;
     }
 
     @Override

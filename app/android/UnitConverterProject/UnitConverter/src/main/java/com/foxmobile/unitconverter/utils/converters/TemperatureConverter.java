@@ -33,7 +33,12 @@ public class TemperatureConverter extends ConverterBase {
 
     @Override
     protected int getBackground() {
-        return R.drawable.bg_temperature;
+        return R.color.bg_temperature;
+    }
+
+    @Override
+    protected int getSymbolResId() {
+        return R.drawable.symbol_temperature;
     }
 
     @Override

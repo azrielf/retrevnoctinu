@@ -24,6 +24,7 @@ public abstract class ConverterBase {
 
     abstract protected String getConverterType();
     abstract protected int getBackground();
+    abstract protected int getSymbolResId();
     abstract protected void initUnits();
     abstract protected void initConversions();
 

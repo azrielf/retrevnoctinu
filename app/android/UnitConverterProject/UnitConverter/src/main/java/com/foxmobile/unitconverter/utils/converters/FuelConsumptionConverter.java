@@ -1,5 +1,7 @@
 package com.foxmobile.unitconverter.utils.converters;
 
+import com.foxmobile.unitconverter.R;
+
 import android.util.Pair;
 
 /**
@@ -33,7 +35,12 @@ public class FuelConsumptionConverter extends ConverterBase {
 
     @Override
     protected int getBackground() {
-        return android.R.color.holo_green_dark;
+        return R.color.bg_fuel_consumption;
+    }
+
+    @Override
+    protected int getSymbolResId() {
+        return R.drawable.symbol_fuel_consumption;
     }
 
     @Override

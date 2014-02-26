@@ -1,15 +1,16 @@
 package com.foxmobile.unitconverter.activities;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.util.Pair;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
@@ -17,10 +18,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -30,12 +30,15 @@ import com.foxmobile.unitconverter.utils.adapters.UnitsSpinnerAdapter;
 import com.foxmobile.unitconverter.utils.converters.ConverterBase;
 import com.foxmobile.unitconverter.utils.converters.ConvertersManager;
 
-import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 
+
 public class MainActivity extends ActionBarActivity implements android.app.ActionBar.OnNavigationListener {
+
+    static private final String TAG = "UnitsConverter";
+    static private final String PREF_SELECTED_UNIT_TYPE = "SelectedUnitType";
 
     ConvertersManager mConverters;
     View mContainer;
@@ -65,6 +68,18 @@ public class MainActivity extends ActionBarActivity implements android.app.Actio
         // for the 9 patch background to work properly
         mContainer = findViewById(R.id.container);
         mContainer.setPadding(0, 0, 0, 0);
+
+        // restore the last unit type selection of the user
+        getActionBar().setSelectedNavigationItem(getPreferences(Activity.MODE_PRIVATE).getInt(PREF_SELECTED_UNIT_TYPE, 0));
+    }
+
+    @Override
+    protected void onDestroy() {
+        SharedPreferences.Editor editor = getPreferences(Activity.MODE_PRIVATE).edit();
+        editor.putInt(PREF_SELECTED_UNIT_TYPE, getActionBar().getSelectedNavigationIndex());
+        editor.commit();
+
+        super.onDestroy();
     }
 
     @Override
@@ -73,7 +88,6 @@ public class MainActivity extends ActionBarActivity implements android.app.Actio
 
         mConverters.setCurrConverter(selectedConverterType);
         mConverters.updateUnits(selectedConverterType);
-
 
         mContainer.setBackgroundResource(mConverters.getCurrConverterBackground());
 
@@ -108,18 +122,26 @@ public class MainActivity extends ActionBarActivity implements android.app.Actio
             implements ConvertersManager.ConvertersManagerListener,
                        View.OnFocusChangeListener,
                        AdapterView.OnItemSelectedListener,
-                       TextWatcher{
+                       TextWatcher {
 
-        static final String NUMBER_EDIT_FORMAT = "0.####"; //"%.3f";
-        static final String NUMBER_DISPLAY_FORMAT = "#,###.####"; //"%1$,.3f";
+        static private final String PREF_SELECTED_UNIT_1 = "SelectedUnit1";
+        static private final String PREF_SELECTED_UNIT_2 = "SelectedUnit2";
+        static private final String PREF_VALUE_UNIT_1 = "ValueUnit1";
+
+        static private final String NUMBER_EDIT_FORMAT = "0.####"; //"%.3f";
+        static private final String NUMBER_DISPLAY_FORMAT = "#,###.####"; //"%1$,.3f";
 
         EditText mTextUnit1;
         EditText mTextUnit2;
         Spinner mSpinnerUnits1;
         Spinner mSpinnerUnits2;
+        ImageView mImageSymbol;
         ConvertersManager mConverters;
         UnitsSpinnerAdapter mAdapterUnits;
         boolean mWatchTextUnit = true;
+        boolean mInitialUnitTypeSelection = true;
+        int mLastSelectedUnit1;
+        int mLastSelectedUnit2;
 
         public PlaceholderFragment(ConvertersManager converters) {
             mConverters = converters;
@@ -152,13 +174,42 @@ public class MainActivity extends ActionBarActivity implements android.app.Actio
             mSpinnerUnits2.setAdapter(mAdapterUnits);
             mSpinnerUnits2.setOnItemSelectedListener(this);
 
+            mImageSymbol = (ImageView)rootView.findViewById(R.id.imageUnitSymbol);
+
             return rootView;
         }
 
         @Override
+        public void onDestroyView() {
+            SharedPreferences.Editor editor = getActivity().getPreferences(Activity.MODE_PRIVATE).edit();
+            editor.putInt(PREF_SELECTED_UNIT_1, mSpinnerUnits1.getSelectedItemPosition());
+            editor.putInt(PREF_SELECTED_UNIT_2, mSpinnerUnits2.getSelectedItemPosition());
+            editor.putString(PREF_VALUE_UNIT_1, mTextUnit1.getText().toString());
+            editor.commit();
+
+            super.onDestroyView();
+        }
+
+        @Override
         public void onCurrentUnitsUpdated() {
-            mSpinnerUnits1.setSelection(0);
-            mSpinnerUnits2.setSelection(1);
+            mImageSymbol.setImageResource(mConverters.getCurrConverterSymbolResId());
+
+            // The first time the unit type is set, set the selection according to the ones saved in the preferences
+            if (mInitialUnitTypeSelection) {
+                mInitialUnitTypeSelection = false;
+
+                SharedPreferences pref = getActivity().getPreferences(Activity.MODE_PRIVATE);
+                mSpinnerUnits1.setSelection(pref.getInt(PREF_SELECTED_UNIT_1, 0));
+                mSpinnerUnits2.setSelection(pref.getInt(PREF_SELECTED_UNIT_2, 1));
+
+                // restore the last values the user used (the second value is calculated by the first one)
+                mTextUnit1.setText(pref.getString(PREF_VALUE_UNIT_1, "0"));
+                mTextUnit1.setSelection(mTextUnit1.getText().length());
+            } else {
+                mSpinnerUnits1.setSelection(0);
+                mSpinnerUnits2.setSelection(1);
+            }
+
             mAdapterUnits.notifyDataSetChanged();
             convert(true);
         }
@@ -167,10 +218,22 @@ public class MainActivity extends ActionBarActivity implements android.app.Actio
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
             switch (parent.getId()) {
                 case R.id.spinnerUnits1:
+                    // never have both spinners show the same unit
+                    if (position == mSpinnerUnits2.getSelectedItemPosition()) {
+                        mSpinnerUnits2.setSelection(mLastSelectedUnit1);
+                    }
+                    mLastSelectedUnit1 = position;
+
 //                    convert(false);
                     convert(true);
                     break;
                 case R.id.spinnerUnits2:
+                    // never have both spinners show the same unit
+                    if (position == mSpinnerUnits1.getSelectedItemPosition()) {
+                        mSpinnerUnits1.setSelection(mLastSelectedUnit2);
+                    }
+                    mLastSelectedUnit2 = position;
+
                     convert(true);
                     break;
             }

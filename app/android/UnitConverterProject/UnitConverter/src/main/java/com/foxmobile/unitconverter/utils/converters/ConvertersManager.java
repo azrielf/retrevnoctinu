@@ -61,6 +61,10 @@ public class ConvertersManager {
         return mCurrConverter.getBackground();
     }
 
+    public int getCurrConverterSymbolResId() {
+        return mCurrConverter.getSymbolResId();
+    }
+
     public void updateUnits(Integer currConverterType) {
         mCurrConverterUnits.clear();
         mCurrConverterUnits.addAll(mConverters.get(currConverterType).getUnits());

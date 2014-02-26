@@ -1,5 +1,7 @@
 package com.foxmobile.unitconverter.utils.converters;
 
+import com.foxmobile.unitconverter.R;
+
 import android.util.Pair;
 
 /**
@@ -43,7 +45,12 @@ public class AreaConverter extends ConverterBase {
 
     @Override
     protected int getBackground() {
-        return android.R.color.holo_blue_bright;
+        return R.color.bg_area;
+    }
+
+    @Override
+    protected int getSymbolResId() {
+        return R.drawable.ic_launcher;
     }
 
     @Override

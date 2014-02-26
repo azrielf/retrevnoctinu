@@ -1,5 +1,7 @@
 package com.foxmobile.unitconverter.utils.converters;
 
+import com.foxmobile.unitconverter.R;
+
 import android.util.Pair;
 
 /**
@@ -39,7 +41,12 @@ public class SpeedConverter extends ConverterBase {
 
     @Override
     protected int getBackground() {
-        return android.R.color.holo_green_dark;
+        return R.color.bg_speed;
+    }
+
+    @Override
+    protected int getSymbolResId() {
+        return R.drawable.ic_launcher;
     }
 
     @Override
