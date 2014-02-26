@@ -56,7 +56,7 @@ public class TimeConverter extends ConverterBase {
 
     @Override
     protected int getSymbolResId() {
-        return R.drawable.ic_launcher;
+        return R.drawable.symbol_time;
     }
 
     @Override

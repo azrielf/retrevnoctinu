@@ -56,7 +56,7 @@ public class DigitalStorageConverter extends ConverterBase {
 
     @Override
     protected int getSymbolResId() {
-        return R.drawable.ic_launcher;
+        return R.drawable.symbol_digital_storage;
     }
 
     @Override

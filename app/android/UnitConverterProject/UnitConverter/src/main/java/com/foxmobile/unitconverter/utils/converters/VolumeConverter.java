@@ -68,7 +68,7 @@ public class VolumeConverter extends ConverterBase {
 
     @Override
     protected int getSymbolResId() {
-        return R.drawable.ic_launcher;
+        return R.drawable.symbol_volume;
     }
 
     @Override
