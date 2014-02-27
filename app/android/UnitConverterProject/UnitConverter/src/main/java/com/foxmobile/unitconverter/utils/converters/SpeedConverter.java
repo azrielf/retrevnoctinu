@@ -46,7 +46,7 @@ public class SpeedConverter extends ConverterBase {
 
     @Override
     protected int getSymbolResId() {
-        return R.drawable.ic_launcher;
+        return R.drawable.symbol_speed;
     }
 
     @Override

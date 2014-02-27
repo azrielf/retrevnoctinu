@@ -50,7 +50,7 @@ public class AreaConverter extends ConverterBase {
 
     @Override
     protected int getSymbolResId() {
-        return R.drawable.ic_launcher;
+        return R.drawable.symbol_area;
     }
 
     @Override

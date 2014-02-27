@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="bg_temperature">#cc353c</color>
-    <color name="bg_length">#b157db</color>
+    <color name="bg_length">#ff6a00</color>
     <color name="bg_mass">#ff9c3a</color>
     <color name="bg_speed">#669900</color>
-    <color name="bg_volume">#ba612a</color>
-    <color name="bg_area">#00ddff</color>
-    <color name="bg_fuel_consumption">#669900</color>
-    <color name="bg_time">#669900</color>
+    <color name="bg_volume">#3eb758</color>
+    <color name="bg_area">#47d4ff</color>
+    <color name="bg_fuel_consumption">#2d8bef</color>
+    <color name="bg_time">#b157db</color>
     <color name="bg_digital_storage">#7c74c6</color>
 </resources>
