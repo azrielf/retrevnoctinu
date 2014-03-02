@@ -65,8 +65,8 @@ public class MainActivity extends ActionBarActivity implements android.app.Actio
         Context themeContext = new ContextThemeWrapper(this, android.R.style.Theme_Holo);
         final ConvertersSpinnerAdapter adapterConverters = new ConvertersSpinnerAdapter(themeContext, mConverters);
 
-        getActionBar().setDisplayShowTitleEnabled(false);
-        getActionBar().setDisplayShowHomeEnabled(false);
+//        getActionBar().setDisplayShowTitleEnabled(false);
+//        getActionBar().setDisplayShowHomeEnabled(false);
         getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
         getActionBar().setListNavigationCallbacks(adapterConverters, this);
 

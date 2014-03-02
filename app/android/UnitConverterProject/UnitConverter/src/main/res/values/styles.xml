@@ -5,4 +5,13 @@
         <!-- Customize your theme here. -->
     </style>
 
+    <style name="AppTheme.NoTitle" parent="AppTheme">
+        <item name="android:actionBarStyle">@style/ActionBarNoIcon</item>
+    </style>
+
+    <!-- this is to prevent the icon and title from appearing for a second before the code removes them -->
+    <style name="ActionBarNoIcon" parent="android:Widget.Holo.Light.ActionBar.Solid.Inverse">
+        <item name="android:displayOptions">useLogo</item>
+    </style>
+
 </resources>
