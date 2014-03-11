@@ -1,0 +1,9 @@
+graphics/Screenshots/
+graphics/Original_Images/
+graphics/UnitSymbols/
+.gradle/
+app/android/UnitConverterProject/UnitConverter/UnitConverter.apk
+gradle/wrapper/gradle-wrapper.properties
+gradle/
+graphics/ic_collage.png
+graphics/ic_collage_512.png
